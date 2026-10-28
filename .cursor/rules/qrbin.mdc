@@ -1,0 +1,18 @@
+---
+description: Remember how qrbin builds, installs, and what it must not do
+alwaysApply: true
+---
+
+# qrbin
+
+One Rust package named `qrbin` at the repo root. There is no `qrbin-cli` crate.
+
+- `make` starts in `Makefile` and installs `target/release/qrbin` to `~/.local/bin/qrbin`. `make build` only compiles.
+- `make deb` and `make linux` start `packaging/build-linux.sh`, then `packaging/Dockerfile`, `packaging/build-inside.sh`, and `packaging/mkdeb.py`.
+- Linux output is one glibc 2.27 amd64 build: `dist/qrbin-linux-amd64` and `dist/qrbin_<version>-1_amd64.deb`. It covers Ubuntu 18.04, 22.04, and 24.04.
+- Host `cargo` on this Mac is Homebrew. Do not set Cargo's default target away from this machine.
+- CLI is `qrbin [OPTIONS] [PAYLOAD]`. Formats are `png` and `svg`. ECC values are `low`, `medium`, `quartile`, and `high`.
+- 0.1.0 is classic only. `--type` will default to `classic`. Themed output is `qr-code-styling` 0.2.4 with the `png` feature, from 0.1.1 through 0.1.8. No 0.1.9.
+- No telemetry, HTTP client, update checker, or payload logging.
+
+Before build, install, or packaging work, read `.cursor/skills/qrbin/SKILL.md`.
