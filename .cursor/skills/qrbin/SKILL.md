@@ -77,4 +77,4 @@ Do not add an HTTP client, telemetry, crash reporter, update check, remote confi
 
 ## Tests
 
-`cargo test` runs `tests/cli_test.rs`. `library_examples` writes the curated PNGs in the README appendix to `library/`. Logo examples use `assets/logo.png`.
+`cargo test` runs `tests/cli_test.rs`. `library_examples` writes the curated PNGs in the README appendix to `library/`. Logo examples use `assets/logo.png`. `binary_does_not_phone_home` reads the built binary, rejects tracker hosts and network libraries, and runs a classic and a themed command with the network denied.

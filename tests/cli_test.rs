@@ -526,3 +526,184 @@ fn library_examples() {
         std::fs::write(format!("library/{}", example.file), &output).expect(example.file);
     }
 }
+
+#[test]
+fn binary_does_not_phone_home() {
+    let bin = assert_cmd::cargo::cargo_bin("qrbin");
+    let bytes = std::fs::read(&bin).expect("read qrbin");
+
+    let hosts = embedded_hosts(&bytes);
+    assert_eq!(
+        hosts,
+        vec!["github.com".to_string(), "www.w3.org".to_string()],
+        "qrbin embedded an unexpected URL host"
+    );
+    assert!(
+        https_urls_are_only_the_clap_bug_link(&bytes),
+        "qrbin embedded an https URL other than the clap bug-report string"
+    );
+    for tracker in [
+        "sentry.io",
+        "bugsnag",
+        "crashlytics",
+        "posthog",
+        "mixpanel",
+        "segment.io",
+        "google-analytics",
+        "googletagmanager",
+        "reqwest",
+        "ureq",
+    ] {
+        assert!(
+            !contains_ascii_ignore_case(&bytes, tracker),
+            "qrbin contains tracker marker {tracker}"
+        );
+    }
+    assert_no_network_libraries(&bin);
+
+    for args in [
+        &["--format", "png", "--size", "64", "offline"][..],
+        &[
+            "--theme",
+            "dots",
+            "--shape",
+            "circle",
+            "--frame",
+            "8",
+            "--text",
+            "Scan Me!",
+            "--format",
+            "png",
+            "--size",
+            "128",
+            "offline",
+        ][..],
+    ] {
+        let output = run_with_network_denied(&bin, args);
+        assert!(
+            output.status.success(),
+            "network denied run failed: {:?}\n{}",
+            output.status,
+            String::from_utf8_lossy(&output.stderr)
+        );
+        assert!(
+            output.stdout.starts_with(b"\x89PNG") && output.stdout.len() > 32,
+            "network denied run did not write a png"
+        );
+        assert!(
+            output.stderr.is_empty(),
+            "stderr: {}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+    }
+}
+
+fn embedded_hosts(bytes: &[u8]) -> Vec<String> {
+    let mut hosts = Vec::new();
+    for scheme in [b"https://".as_slice(), b"http://".as_slice()] {
+        let mut index = 0;
+        while let Some(found) = bytes[index..]
+            .windows(scheme.len())
+            .position(|window| window == scheme)
+        {
+            let start = index + found + scheme.len();
+            let mut end = start;
+            while end < bytes.len() && is_host_byte(bytes[end]) {
+                end += 1;
+            }
+            if let Ok(host) = std::str::from_utf8(&bytes[start..end]) {
+                let host = host.to_ascii_lowercase();
+                if !host.is_empty() && !hosts.contains(&host) {
+                    hosts.push(host);
+                }
+            }
+            index = start;
+        }
+    }
+    hosts.sort();
+    hosts
+}
+
+fn https_urls_are_only_the_clap_bug_link(bytes: &[u8]) -> bool {
+    let marker = b"https://github.com/clap-rs/clap/issues";
+    let mut index = 0;
+    while let Some(found) = bytes[index..]
+        .windows(8)
+        .position(|window| window == b"https://")
+    {
+        let at = index + found;
+        if !bytes[at..].starts_with(marker) {
+            return false;
+        }
+        index = at + 8;
+    }
+    true
+}
+
+fn contains_ascii_ignore_case(bytes: &[u8], needle: &str) -> bool {
+    let needle = needle.as_bytes();
+    bytes.windows(needle.len()).any(|window| {
+        window
+            .iter()
+            .zip(needle)
+            .all(|(byte, expected)| byte.to_ascii_lowercase() == expected.to_ascii_lowercase())
+    })
+}
+
+fn is_host_byte(byte: u8) -> bool {
+    byte.is_ascii_alphanumeric() || byte == b'.' || byte == b'-'
+}
+
+fn assert_no_network_libraries(bin: &std::path::Path) {
+    if cfg!(target_os = "macos") {
+        let output = std::process::Command::new("otool")
+            .args(["-L"])
+            .arg(bin)
+            .output()
+            .expect("otool");
+        assert!(output.status.success(), "otool failed");
+        let text = String::from_utf8_lossy(&output.stdout);
+        let mut libraries = Vec::new();
+        for line in text.lines().skip(1) {
+            let path = line.split_whitespace().next().unwrap_or("");
+            if !path.is_empty() {
+                libraries.push(path.to_string());
+            }
+        }
+        assert!(
+            libraries.iter().all(|path| {
+                path.ends_with("/libSystem.B.dylib") || path.ends_with("/libiconv.2.dylib")
+            }),
+            "unexpected linked libraries: {libraries:?}"
+        );
+    } else if cfg!(target_os = "linux") {
+        let output = std::process::Command::new("ldd")
+            .arg(bin)
+            .output()
+            .expect("ldd");
+        let text = String::from_utf8_lossy(&output.stdout).to_ascii_lowercase();
+        for forbidden in ["libcurl", "libssl", "libnghttp", "cfnetwork"] {
+            assert!(!text.contains(forbidden), "{forbidden} is linked");
+        }
+    }
+}
+
+fn run_with_network_denied(bin: &std::path::Path, args: &[&str]) -> std::process::Output {
+    let mut command = if cfg!(target_os = "macos") {
+        let mut command = std::process::Command::new("sandbox-exec");
+        command.args(["-p", "(version 1)\n(allow default)\n(deny network*)\n"]);
+        command.arg(bin);
+        command
+    } else if cfg!(target_os = "linux") {
+        let mut command = std::process::Command::new("unshare");
+        command.args(["--net", "--"]);
+        command.arg(bin);
+        command
+    } else {
+        panic!("this OS has no network-denial runner");
+    };
+    command
+        .args(args)
+        .output()
+        .expect("run qrbin with network denied")
+}
