@@ -1,6 +1,6 @@
 [package]
 name = "qrbin"
-version = "0.1.0"
+version = "0.1.8"
 edition = "2021"
 rust-version = "1.85"
 description = "Minimal, offline-first QR code generator with no telemetry and no network access."
@@ -25,6 +25,9 @@ qrcode = { version = "0.14", default-features = false, features = [
     "svg",
 ] }
 image = { version = "0.25", default-features = false, features = ["png"] }
+qr-code-styling = { version = "0.2.4", default-features = false, features = ["png"] }
+serde = { version = "1", features = ["derive"] }
+toml = "0.8"
 zeroize = { version = "1", features = ["derive"] }
 
 [dev-dependencies]

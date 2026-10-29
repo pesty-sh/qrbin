@@ -3,6 +3,7 @@ mod cli;
 mod error;
 mod output;
 mod qr;
+mod theme;
 
 use clap::Parser;
 use cli::Args;
@@ -24,8 +25,13 @@ fn main() {
 
 fn run(args: &Args) -> Result<(), error::QrError> {
     let payload = qr::read_payload(args)?;
-    let code = qr::encode(&payload, args.ecc.into())?;
-    output::write(&code, args)?;
+    match theme::resolve(args)? {
+        None => {
+            let code = qr::encode(&payload, args.ecc.into())?;
+            output::write(&code, args)?;
+        }
+        Some(style) => output::write_themed(&payload, args, &style)?,
+    }
 
     Ok(())
 }

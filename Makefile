@@ -1,9 +1,9 @@
 # Build for this Mac, install that binary, or package Linux .deb files.
 # `make` builds the release binary for the current machine and installs it
-# to ~/.local/bin, which is ahead of /usr/local/bin on PATH. Run it again
-# after a change to update the installed command.
+# to /usr/local/bin, which this shell already searches. Run it again after a
+# change to update the installed command.
 
-PREFIX ?= $(HOME)/.local
+PREFIX ?= /usr/local
 BINDIR ?= $(PREFIX)/bin
 
 .PHONY: build install deb linux

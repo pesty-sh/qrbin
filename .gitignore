@@ -15,6 +15,8 @@ mutants.out*/
 /dist/
 qr.png
 qr.svg
+/library/*
+!/library/*.png
 
 # Editor and OS
 .DS_Store
