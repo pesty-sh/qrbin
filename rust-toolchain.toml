@@ -1,5 +1,5 @@
 [toolchain]
 channel = "stable"
-# Installed automatically by rustup. Cargo still builds for this Mac unless
-# you pass --target. Linux packages are produced by `make deb`.
+# rustup reads this when make calls ~/.cargo/bin/cargo. It does not change
+# the default build target. Homebrew's cargo ignores this file.
 targets = ["aarch64-apple-darwin", "x86_64-unknown-linux-gnu"]

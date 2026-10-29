@@ -2,7 +2,7 @@
 
 **A minimal, offline-first QR generator.**
 
-`qrbin` reads a payload and writes one QR image to stdout. The running program has no telemetry, analytics, update check, account system, or outbound network connection. `cargo build` and `make deb` may use the network on the build machine to fetch crates or a Docker image.
+`qrbin` reads a payload and writes one QR image to stdout. The running program has no telemetry, analytics, update check, account system, or outbound network connection. The first build on a machine may download crates. After that, `make` compiles offline.
 
 ```text
 Read payload → choose a renderer → write PNG or SVG to stdout → exit
@@ -20,36 +20,95 @@ A themed payload must be valid UTF-8. The classic renderer accepts any bytes.
 
 ## Install and build
 
-Run these from the repository root. [`Makefile`](Makefile) starts both builds. [`Cargo.toml`](Cargo.toml) is the only package. There is no `qrbin-cli` crate. [`rust-toolchain.toml`](rust-toolchain.toml) tells rustup which extra targets to install. It does not change the default build target.
+Run these from the repository root. [`Makefile`](Makefile) starts the Mac build. [`Cargo.toml`](Cargo.toml) is the only package. There is no `qrbin-cli` crate. The license is [MIT](LICENSE).
 
-The program does not update itself. Run `make` again, or install a newer `.deb`.
+The program does not update itself. Run `make` again to replace the installed binary.
 
-### This Mac
+### Which Macs can run it
 
-```bash
-make
-qrbin --version
-```
+* An Intel Mac from 2014 or newer, running macOS 10.12 Sierra or newer. The binary is marked compatible with that floor. `make` refuses the result if the stamp is newer than 10.12.
+* An Apple silicon Mac running macOS 11 Big Sur or newer. `make build-silicon` checks that stamp.
+* The 2008 17-inch MacBook Pro stops at OS X 10.11. Current Rust does not build a binary that system can load.
 
-1. The `install` target depends on `build`.
-2. `build` runs `cargo build --release`.
-3. The binary is `target/release/qrbin`.
-4. `install` copies it to `/usr/local/bin/qrbin`.
+2014 through the last Intel Mac are one compile: `x86_64-apple-darwin`. Every Apple silicon chip is the other compile: `aarch64-apple-darwin`.
 
-`make build` stops after step 3. On this machine, `make` uses the `cargo` first on `PATH`.
+### See the compilers before you build
 
-### Ubuntu 18.04, 22.04, and 24.04
+* `make doctor` prints the rustup `cargo` and `rustc` that `make` calls, the Homebrew cargo it ignores, the 10.12 deployment target, and whether a Docker daemon is running.
+* `cargo --version` is Homebrew Rust when `/usr/local/bin` comes first. Its standard library is stamped macOS 13.0, and it has no Apple silicon standard library. A 2014 Mac cannot load that Intel binary. Do not call it for this build. `make` pins `RUSTC` to rustup's compiler so the Homebrew one cannot be selected by accident.
 
-Start Docker, then:
+[`rust-toolchain.toml`](rust-toolchain.toml) tells rustup which extra targets to install. It does not change the default build target. Homebrew's cargo ignores that file.
 
-```bash
-make deb
-sudo dpkg -i dist/qrbin_0.1.8-1_amd64.deb
-```
+### Build and install the Intel binary
 
-`make linux` is the same target. [`packaging/build-linux.sh`](packaging/build-linux.sh) builds the image from [`packaging/Dockerfile`](packaging/Dockerfile), runs [`packaging/build-inside.sh`](packaging/build-inside.sh), and [`packaging/mkdeb.py`](packaging/mkdeb.py) writes the package. The binary is also at `dist/qrbin-linux-amd64`.
+* `make build` compiles `target/release/qrbin`, then [`packaging/check-macos-minos.sh`](packaging/check-macos-minos.sh) reads the stamp with `vtool`. The build fails if the minimum is newer than 10.12.
+* `vtool -show-build target/release/qrbin` shows the same stamp. Look for `minos 10.12` or `version 10.12`.
+* `make` compiles if needed and copies the binary to `/usr/local/bin/qrbin`.
+* `qrbin --version` prints the installed program.
 
-It is linked against glibc 2.27, so the same amd64 package installs on Ubuntu 18.04, 22.04, 24.04, and Debian with `libc6 (>= 2.27)`. The filename follows the version in `Cargo.toml`.
+`make build` stops before the copy. Re-running `make` replaces the installed binary. Do not also install a copy under `~/.local/bin`.
+
+### Build the Apple silicon binary
+
+This Intel Mac can cross-compile it. The file is not installed here, because this machine cannot run it.
+
+* `make build-silicon`
+* The binary is `target/aarch64-apple-darwin/release/qrbin`.
+* `vtool -show-build target/aarch64-apple-darwin/release/qrbin` should show macOS 11.0.
+
+### Homebrew
+
+The formula is [`packaging/homebrew/qrbin.rb`](packaging/homebrew/qrbin.rb). It builds with `cargo install --locked` into Homebrew's prefix. It does not run `make install`.
+
+Public names, already written into [`Cargo.toml`](Cargo.toml) and the formula:
+
+* GitHub account `pestyesky`, source repo `https://github.com/pestyesky/qrbin`
+* Tap repo `https://github.com/pestyesky/homebrew-tap`
+* Homepage `https://pesty.sh`
+* Contact `hello@pesty.sh`
+
+Those GitHub repos are not created yet. `brew install` cannot fetch them until the account exists and the source repo is pushed. There is a separate Homebrew cask named `pesty` (a clipboard app). This formula is named `qrbin`.
+
+`brew install` compiles with Homebrew's Rust. That compiler stamps macOS 13.0. People who install from Homebrew are on a current Mac. The 2014 build is `make`, not `brew`.
+
+On this Intel Mac, Homebrew's prefix is `/usr/local`. `brew install` and `make` replace the same `/usr/local/bin/qrbin`.
+
+* `brew --prefix` prints `/usr/local` on this Mac, and `/opt/homebrew` on Apple silicon.
+
+Create the account and the two empty GitHub repos first (`qrbin` and `homebrew-tap`). Then, from this repository:
+
+* `git remote add origin https://github.com/pestyesky/qrbin.git`
+* `git push -u origin master`
+
+In a checkout of `homebrew-tap`:
+
+* `mkdir -p Formula`
+* `cp /path/to/qrbin/packaging/homebrew/qrbin.rb Formula/qrbin.rb`
+* `git add Formula/qrbin.rb`
+* `git commit -m "Add the qrbin formula."`
+* `git push -u origin main`
+
+Install from the latest commit. This needs the source repo to be public:
+
+* `brew tap pestyesky/tap`
+* `brew install --HEAD pestyesky/tap/qrbin`
+* `qrbin --version`
+
+When you want a numbered release, tag the source repo, then replace the two commented lines in the formula with the real checksum:
+
+* `git tag -a 0.1.8 -m "qrbin 0.1.8"`
+* `git push origin 0.1.8`
+* `curl -fsSL -o /tmp/qrbin.tar.gz https://github.com/pestyesky/qrbin/archive/refs/tags/0.1.8.tar.gz`
+* `shasum -a 256 /tmp/qrbin.tar.gz`
+* Paste that hash into `sha256` in `Formula/qrbin.rb`, uncomment `url` and `sha256`, commit, and push the tap.
+* `brew update`
+* `brew install pestyesky/tap/qrbin`
+
+The formula test runs `qrbin --version` and checks that one small PNG starts with the PNG signature. It does not run `cargo test`.
+
+### Linux package
+
+`make deb` is not part of the current Mac build. The Docker client is installed at `/usr/local/bin/docker`, and the daemon is not running: there is no `/var/run/docker.sock` and no Docker process. `make deb` stops until a daemon is started. The packaging scripts are still in [`packaging/`](packaging/).
 
 ## Two renderers, one binary
 
@@ -57,7 +116,7 @@ Omit `--theme` and `--theme-file` and qrbin uses the `qrcode` 0.14 renderer. Tha
 
 Set `--theme`, or pass a `--theme-file` that names one, and qrbin uses `qr-code-styling` 0.2.4 with its `png` feature only. SVG rendering comes with that crate. PNG is rasterized from the SVG after any frame is applied, so a frame appears in both formats. Themed PNG is 8-bit RGBA at the exact `--size` in both dimensions.
 
-Both paths are linked into the one executable. A classic run still uses the `qrcode` writer. The file is about 3.3 MB because the themed path includes `resvg`. JPEG, WebP, PDF, and CMYK stay disabled. There is no 0.1.9 in this line. There is no `--type` flag.
+Both paths are linked into the one executable. A classic run still uses the `qrcode` writer. The file is about 3.5 MB because the themed path includes `resvg`. JPEG, WebP, PDF, and CMYK stay disabled. There is no 0.1.9 in this line. There is no `--type` flag.
 
 The styling crate's own error-correction default is quartile. qrbin always passes `--ecc` through. Its margin is in pixels, so qrbin does not forward the classic module count. See [Quiet zone](#quiet-zone).
 

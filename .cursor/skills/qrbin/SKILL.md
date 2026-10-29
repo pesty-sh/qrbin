@@ -17,21 +17,17 @@ Run from the repo root. `Makefile` starts both processes.
 
 Mac install (`make`, default target `install`):
 
-1. `build` runs `cargo build --release` with the `cargo` on PATH (Homebrew `/usr/local/bin/cargo` on the current Intel Mac).
-2. Output is `target/release/qrbin`.
-3. `install` copies it to `/usr/local/bin/qrbin`. Do not also install a copy under `~/.local/bin`.
+1. `build` runs `~/.cargo/bin/cargo` and pins `RUSTC` to `rustup which rustc`. The proxy loads rustup's `libLLVM` so release stripping works. The pin stops a cross build from selecting `/usr/local/bin/cargo`. That Homebrew compiler stamps macOS 13.0 and has no Apple silicon standard library.
+2. `MACOSX_DEPLOYMENT_TARGET` is `10.12`. `packaging/check-macos-minos.sh` fails the build when `target/release/qrbin` is stamped newer than 10.12.
+3. Output is `target/release/qrbin`.
+4. `install` copies it to `/usr/local/bin/qrbin`. Do not also install a copy under `~/.local/bin`. On this Intel Mac that path is also Homebrew's prefix, so `brew install pestyesky/tap/qrbin` would replace the same file.
+5. The Homebrew formula is `packaging/homebrew/qrbin.rb`. Homepage `https://pesty.sh`, source `https://github.com/pestyesky/qrbin`, tap `pestyesky/homebrew-tap`, contact `hello@pesty.sh`. The formula uses `cargo install --locked`. It must not run `make install`. Homebrew's own Rust stamps macOS 13.0, so a bottle is not the 2014 build.
 
-`make build` stops before the copy. Re-running `make` replaces the installed binary. The program has no update checker and must not gain one.
+`make build` stops before the copy. `make build-silicon` cross-compiles `aarch64-apple-darwin` and checks a macOS 11.0 stamp. It does not install. `make doctor` prints which cargo is used. Re-running `make` replaces the installed binary. The program has no update checker and must not gain one.
 
-Linux package (`make deb` or `make linux`):
+Linux package (`make deb` or `make linux`) needs a running Docker daemon. This Mac has the client and no `/var/run/docker.sock`, so those targets cannot run here. Leave the scripts in place. Do not start a daemon as part of the Mac build.
 
-1. `packaging/build-linux.sh` requires a running Docker daemon.
-2. `packaging/Dockerfile` builds the `qrbin-linux-builder` image (Rust, Zig 0.16.0, `cargo-zigbuild`).
-3. `packaging/build-inside.sh` runs `cargo zigbuild --release --target x86_64-unknown-linux-gnu.2.27`.
-4. `packaging/mkdeb.py` writes `dist/qrbin_<version>-1_amd64.deb`. The raw binary is `dist/qrbin-linux-amd64`.
-5. Version comes from `Cargo.toml`. glibc 2.27 covers Ubuntu 18.04, 22.04, 24.04, and Debian with `libc6 (>= 2.27)`.
-
-`rust-toolchain.toml` only lists extra rustup targets. It does not select the Cargo build target. Do not set a default `build.target`. The Mac build must stay the host machine.
+`rust-toolchain.toml` only lists extra rustup targets. It does not select the Cargo build target. Do not set a default `build.target`. The Mac build must stay the host machine. Homebrew's cargo ignores `rust-toolchain.toml`.
 
 ## CLI
 

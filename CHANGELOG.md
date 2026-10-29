@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- The Intel build calls rustup and keeps a macOS 10.12 stamp, so a 2014 Mac can run it. Homebrew's rustc stamps 13.0 and is not used.
+- `make build-silicon` cross-compiles the Apple silicon binary and checks a macOS 11.0 stamp.
+- Package metadata and `packaging/homebrew/qrbin.rb` point at GitHub `pestyesky/qrbin`, homepage `https://pesty.sh`, and `hello@pesty.sh`.
+
 ## 0.1.0 — 2026-10-28
 
 Classic offline QR CLI. This tag does not include themed rendering.
