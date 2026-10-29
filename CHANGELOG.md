@@ -10,11 +10,16 @@ Classic offline QR CLI. This tag does not include themed rendering.
 - `make` builds the host release binary and installs it to `/usr/local/bin/qrbin`.
 - `make deb` builds one glibc 2.27 amd64 `.deb` for Ubuntu 18.04, 22.04, and 24.04.
 
-## Theme surface
+## 0.1.8 — 2026-10-29
 
-Present in this working tree. Tag `0.1.0` does not include it, and `Cargo.toml` is still `0.1.0`. Behavior is documented in `README.md`.
+Themed rendering in the same binary. A command with no `--theme` and no `--theme-file` stays on the classic renderer.
 
-The classic command stays on the `qrcode` renderer. `--theme` selects `qr-code-styling` 0.2.4 with the `png` feature only. JPEG, WebP, PDF, and CMYK stay out of this line, so there is no 0.1.9.
+- Themes: `plain`, `rounded`, `dots`, `classy`.
+- Colors: `--fg`, `--bg`. Gradients: `--gradient linear|radial` with `--from` and `--to`. On a radial gradient, `--from` is the center and `--to` is the edge.
+- `--shape circle`. `--logo` reads a local file and rejects a path that contains `://`.
+- Border width `--frame` / `--border-width`, color `--frame-color` / `--border-color`, text `--label` / `--text`. A circle border is a ring.
+- `--theme-file` reads local TOML. Command flags override the file.
+- JPEG, WebP, PDF, and CMYK stay out, so there is no 0.1.9.
 
 | Version | Scope |
 |---|---|

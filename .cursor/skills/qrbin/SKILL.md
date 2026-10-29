@@ -55,15 +55,21 @@ Linux package (`make deb` or `make linux`):
 
 `qrcode` 0.14 `quiet_zone` takes a bool. Non-zero margin passes `true` and the library uses its fixed 4-module border. `0` passes `false`. `qrcode` features `image` and `svg` must stay enabled. SVG rendering uses `qrcode::render::svg::Color`, not raw strings.
 
-## Release line
+Release 0.1.8. Do not route a command without `--theme` or `--theme-file` through `qr-code-styling`. `--theme` selects `qr-code-styling` 0.2.4 with the `png` feature only. Do not add `--type`. There is no 0.1.9. Linking the themed renderer increases binary size even for classic runs.
 
-0.1.0 is the classic release tag. Do not route a command without `--theme` or `--theme-file` through `qr-code-styling`. `--theme` selects `qr-code-styling` 0.2.4 with the `png` feature only. Do not add `--type`. Scope through 0.1.8 is in `CHANGELOG.md`. There is no 0.1.9. Linking the themed renderer increases binary size even for classic runs.
+## Theme arguments
 
-## Theme CLI
+Omit `--theme` and `--theme-file` for the `qrcode` renderer. Otherwise use `qr-code-styling` 0.2.4 with the `png` feature only. Themes are `plain` (square modules and finders), `rounded` (rounded modules, extra-rounded finder squares, dot centers), `dots` (circular modules and finders), and `classy` (classy-rounded modules, extra-rounded finder squares, dot centers).
 
-The product interface is documented once in `README.md`. Do not add classic/themed command pairs back into that file.
+Style flags require `--theme` or a `theme` key in `--theme-file`. Command flags win over the file. Theme-file keys are `theme`, `fg`, `bg`, `gradient`, `from`, `to`, `shape`, `logo`, `frame`, `frame_color`, and `label`. Unknown keys are rejected. `format`, `size`, `margin`, and `ecc` stay on the command line.
 
-Omit `--theme` and `--theme-file` for the `qrcode` renderer. Otherwise use `qr-code-styling` 0.2.4 with the `png` feature only. Themes are `plain`, `rounded`, `dots`, and `classy`. Command flags win over the theme file. A non-zero themed margin is `size / 16` pixels. Classic margin is the library's fixed 4-module border, on for any non-zero value. No URL fetch. No border images. Errors must not echo the payload. Pair a logo or a circle with `--ecc high`. Local binary is `./target/release/qrbin`.
+`--fg` and `--bg` are hex, with or without `#`, at 3, 6, or 8 digits. Defaults are `#000000` and `#ffffff`. Finders inherit `--fg`. `--gradient` is `linear` or `radial` and needs both `--from` and `--to`. `--from` is the linear start and the radial center. `--to` is the linear end and the radial edge. The background stays flat.
+
+`--shape` is `square` or `circle`. A circle adds rim modules. `--logo` reads a local file. A path containing `://` is rejected and is not written into the SVG. Use `--ecc high` with a logo or a circle. `--ecc` is always passed through. The styling crate's own default is quartile.
+
+`--frame` and `--border-width` are the border width in pixels. `--frame-color` and `--border-color` default to black. `--label` and `--text` are the border text. Color or text without a width is an error. On a square the text sits on the bottom edge. On a circle the border is a ring, the mark is inset by the width, and the text follows the lower arc in the background color, sized from the width. Do not add border images.
+
+Classic `--size` is a minimum and the PNG is grayscale. Themed `--size` is exact and the PNG is RGBA. A non-zero themed margin is `size / 16` pixels. `0` omits that pad. Errors must not echo the payload. No URL fetch. No remote config. The logo file is `assets/logo.png`. The SVG source is `assets/logo.svg`. Local binary is `./target/release/qrbin`. Installed binary is `/usr/local/bin/qrbin`.
 
 ## Privacy limits
 

@@ -8,7 +8,7 @@
 Read payload → choose a renderer → write PNG or SVG to stdout → exit
 ```
 
-The package version in this tree is 0.1.0. The annotated tag `0.1.0` is the classic renderer only. This tree also contains the theme surface below. See [CHANGELOG.md](CHANGELOG.md).
+The package version is 0.1.8. Omit `--theme` and the classic renderer runs. Set a theme and the flags below style the mark. See [CHANGELOG.md](CHANGELOG.md).
 
 ## Limits
 
@@ -44,7 +44,7 @@ Start Docker, then:
 
 ```bash
 make deb
-sudo dpkg -i dist/qrbin_0.1.0-1_amd64.deb
+sudo dpkg -i dist/qrbin_0.1.8-1_amd64.deb
 ```
 
 `make linux` is the same target. [`packaging/build-linux.sh`](packaging/build-linux.sh) builds the image from [`packaging/Dockerfile`](packaging/Dockerfile), runs [`packaging/build-inside.sh`](packaging/build-inside.sh), and [`packaging/mkdeb.py`](packaging/mkdeb.py) writes the package. The binary is also at `dist/qrbin-linux-amd64`.
@@ -116,7 +116,7 @@ A theme picks the module shape and the two finder shapes. Color, gradient, circl
 | `dots` | Circular dots | Dot | Dot |
 | `classy` | Classy rounded | Extra rounded | Dot |
 
-Finders inherit the foreground color. A gradient is applied to the data dots. The background stays one flat color.
+Finders inherit the foreground color. A gradient is applied to the data dots. The background stays one flat color. `--from` is the linear start and the radial center. `--to` is the linear end and the radial edge. All three of `--gradient`, `--from`, and `--to` are required together.
 
 ### Circle
 
@@ -132,7 +132,7 @@ The same rule applies to a `logo` path inside a theme file.
 
 ### Frame
 
-`--frame` sets the border width in pixels. `--border-width` is the same flag. `--frame-color` (or `--border-color`) sets its color, default black. `--label` (or `--text`) sets the border text. On a square mark the text sits on the bottom edge. On a circle the border is a ring and the text follows the lower arc. Color and text without a width are errors.
+`--frame` sets the border width in pixels. `--border-width` is the same flag. `--frame-color` (or `--border-color`) sets its color, default black. `--label` (or `--text`) sets the border text. On a square mark the text sits on the bottom edge. On a circle the border is a ring, the mark is inset by that width, and the text follows the lower arc in the background color, sized from the width. Color and text without a width are errors.
 
 The frame is applied to the SVG, then a PNG is rasterized from that SVG. A label can cause a font lookup on local disk. qrbin does not offer a border image. That styling API would copy a path or URL string into an SVG link, and a viewer could then fetch it.
 
