@@ -7,7 +7,7 @@ alwaysApply: true
 
 One Rust package named `qrbin` at the repo root. There is no `qrbin-cli` crate.
 
-- `make` starts in `Makefile` and calls `~/.cargo/bin/cargo`, not the Homebrew cargo on PATH. The Intel binary must stay stamped macOS 10.12 so a 2014 Mac can run it. `make build` only compiles. `make build-silicon` and `make build-windows` cross-compile and do not install. Windows uses `x86_64-pc-windows-gnu` and the MinGW linker. Install copies `target/release/qrbin` to `/usr/local/bin/qrbin`. Do not install a second copy under `~/.local/bin`.
+- `make` starts in `Makefile` and calls `~/.cargo/bin/cargo`, not the Homebrew cargo on PATH. The Intel binary must stay stamped macOS 10.12 so a 2014 Mac can run it. `make` and `make build` only compile `target/release/qrbin`. They do not copy it onto PATH. `make build-silicon` and `make build-windows` cross-compile and do not install. Windows uses `x86_64-pc-windows-gnu` and the MinGW linker. The published Mac install is `brew install pesty-sh/tap/qrbin`. Do not also install a copy under `~/.local/bin`.
 - `make deb` and `make linux` start `packaging/build-linux-host.sh`. The glibc floor is 2.27, Ubuntu 18.04. That binary also runs on Ubuntu 20.04, 22.04, and 24.04, Debian 10 through 13, and Arch. Intel and AMD are `dist/qrbin-linux-amd64`. 64-bit ARM is `dist/qrbin-linux-arm64`. Each gets a `.deb`. Docker is not used. Do not install those binaries over the Mac one.
 - Host `cargo` on this Mac is Homebrew. Do not set Cargo's default target away from this machine.
 - CLI is `qrbin [OPTIONS] [PAYLOAD]`. Formats are `png` and `svg`. ECC values are `low`, `medium`, `quartile`, and `high`.

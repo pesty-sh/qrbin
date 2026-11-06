@@ -39,14 +39,15 @@ The program does not update itself. Run `make` again to replace the installed bi
 
 [`rust-toolchain.toml`](rust-toolchain.toml) tells rustup which extra targets to install. It does not change the default build target. Homebrew's cargo ignores that file.
 
-### Build and install the Intel binary
+### Build the Intel binary
 
-* `make build` compiles `target/release/qrbin`, then [`packaging/check-macos-minos.sh`](packaging/check-macos-minos.sh) reads the stamp with `vtool`. The build fails if the minimum is newer than 10.12.
-* `vtool -show-build target/release/qrbin` shows the same stamp. Look for `minos 10.12` or `version 10.12`.
-* `make` compiles if needed and copies the binary to `/usr/local/bin/qrbin`.
-* `qrbin --version` prints the installed program.
+`make` and `make build` are the same command. Both compile `target/release/qrbin` and leave it there. Neither copies a binary onto `PATH`.
 
-`make build` stops before the copy. Re-running `make` replaces the installed binary. Do not also install a copy under `~/.local/bin`.
+* `make`
+* `vtool -show-build target/release/qrbin` shows the stamp. Look for `minos 10.12` or `version 10.12`. [`packaging/check-macos-minos.sh`](packaging/check-macos-minos.sh) fails the build when the minimum is newer than 10.12.
+* `./target/release/qrbin --version` runs that fresh build.
+
+Do not copy this file to `/usr/local/bin` or `~/.local/bin`. The published Mac install is Homebrew, below.
 
 ### Build the Apple silicon binary
 
@@ -70,7 +71,7 @@ This builds `qrbin.exe` for 64-bit Windows 10 and Windows 11. It does not instal
 
 ### Homebrew
 
-The formula is [`packaging/homebrew/qrbin.rb`](packaging/homebrew/qrbin.rb). It builds with `cargo install --locked` into Homebrew's prefix. It does not run `make install`.
+The formula is [`packaging/homebrew/qrbin.rb`](packaging/homebrew/qrbin.rb). It builds with `cargo install --locked` into Homebrew's prefix. `make` does not install.
 
 Public names, already written into [`Cargo.toml`](Cargo.toml) and the formula:
 
@@ -79,32 +80,24 @@ Public names, already written into [`Cargo.toml`](Cargo.toml) and the formula:
 * Homepage `https://pesty.sh`
 * Contact `pesty@pesty.sh`
 
-The GitHub account `pesty-sh` exists. The `qrbin` and `homebrew-tap` repositories are not created yet, so `brew install` cannot fetch them until those repos are pushed. There is a separate Homebrew cask named `pesty` (a clipboard app). This formula is named `qrbin`.
+The GitHub account `pesty-sh` exists, and both repositories are public. There is a separate Homebrew cask named `pesty` (a clipboard app). This formula is named `qrbin`.
 
-`brew install` compiles with Homebrew's Rust. That compiler stamps macOS 13.0. People who install from Homebrew are on a current Mac. The 2014 build is `make`, not `brew`.
+`brew install` compiles with Homebrew's Rust. That compiler stamps macOS 13.0. People who install from Homebrew are on a current Mac. The 2014 build is `make`, and that file stays in `target/release/qrbin`.
 
-On this Intel Mac, Homebrew's prefix is `/usr/local`. `brew install` and `make` replace the same `/usr/local/bin/qrbin`.
+On this Intel Mac, Homebrew's prefix is `/usr/local`, so a tap install puts `qrbin` on `PATH` at `/usr/local/bin/qrbin`. On Apple silicon the prefix is `/opt/homebrew`. `make` does not write either of those paths.
 
 * `brew --prefix` prints `/usr/local` on this Mac, and `/opt/homebrew` on Apple silicon.
 
-Create the two empty GitHub repos first (`qrbin` and `homebrew-tap`). Then, from this repository:
+### Install with Homebrew
 
-* `git remote add origin https://github.com/pesty-sh/qrbin.git`
-* `git push -u origin master`
-
-In a checkout of `homebrew-tap`:
-
-* `mkdir -p Formula`
-* `cp /path/to/qrbin/packaging/homebrew/qrbin.rb Formula/qrbin.rb`
-* `git add Formula/qrbin.rb`
-* `git commit -m "Add the qrbin formula."`
-* `git push -u origin main`
-
-Install from the latest commit. This needs the source repo to be public:
+Trust is stored on your Mac. Run it once for this tap. It covers `qrbin` and any later formula in the tap.
 
 * `brew tap pesty-sh/tap`
-* `brew install --HEAD pesty-sh/tap/qrbin`
+* `brew trust --tap pesty-sh/tap`
+* `HOMEBREW_NO_AUTO_UPDATE=1 brew install --HEAD pesty-sh/tap/qrbin`
 * `qrbin --version`
+
+`--HEAD` installs the latest commit on `master`. The first install compiles with Homebrew's Rust and needs a network connection. After that, `qrbin` with no path is the Homebrew build. A fresh build from this repository stays at `./target/release/qrbin` and is not copied onto `PATH`.
 
 When you want a numbered release, tag the source repo, then replace the two commented lines in the formula with the real checksum:
 
@@ -167,7 +160,7 @@ Style flags (`--fg`, `--bg`, `--gradient`, `--from`, `--to`, `--shape`, `--logo`
 qrbin [OPTIONS] [PAYLOAD]
 ```
 
-After `make`, the same flags work as `qrbin` on `PATH`. The examples below use `./target/release/qrbin`.
+The examples below use `./target/release/qrbin`, the binary `make` just wrote. A Homebrew install is `qrbin` on `PATH`.
 
 | Option | Meaning | Default |
 |---|---|---|

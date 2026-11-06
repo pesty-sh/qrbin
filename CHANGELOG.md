@@ -7,6 +7,7 @@
 - `make build-windows` cross-compiles a 64-bit `qrbin.exe` for Windows 10 and 11. It does not install that file on the Mac.
 - `make linux` cross-compiles glibc 2.27 builds for Intel/AMD and 64-bit ARM. That floor runs on Ubuntu 18.04, 20.04, 22.04, 24.04, Debian 10 through 13, and Arch. Docker is not used.
 - Package metadata and `packaging/homebrew/qrbin.rb` point at GitHub `pesty-sh/qrbin`, homepage `https://pesty.sh`, and `pesty@pesty.sh`.
+- `make` no longer installs. Fresh builds stay in `target/`. The Mac program on `PATH` is installed with Homebrew.
 
 ## 0.1.0 — 2026-10-28
 

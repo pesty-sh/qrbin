@@ -15,15 +15,14 @@ Single Rust package at the repo root. Binary and package name are `qrbin`. There
 
 Run from the repo root. `Makefile` starts both processes.
 
-Mac install (`make`, default target `install`):
+Mac build (`make`, default target `build`):
 
 1. `build` runs `~/.cargo/bin/cargo` and pins `RUSTC` to `rustup which rustc`. The proxy loads rustup's `libLLVM` so release stripping works. The pin stops a cross build from selecting `/usr/local/bin/cargo`. That Homebrew compiler stamps macOS 13.0 and has no Apple silicon standard library.
 2. `MACOSX_DEPLOYMENT_TARGET` is `10.12`. `packaging/check-macos-minos.sh` fails the build when `target/release/qrbin` is stamped newer than 10.12.
-3. Output is `target/release/qrbin`.
-4. `install` copies it to `/usr/local/bin/qrbin`. Do not also install a copy under `~/.local/bin`. On this Intel Mac that path is also Homebrew's prefix, so `brew install pesty-sh/tap/qrbin` would replace the same file.
-5. The Homebrew formula is `packaging/homebrew/qrbin.rb`. Homepage `https://pesty.sh`, source `https://github.com/pesty-sh/qrbin`, tap `pesty-sh/homebrew-tap`, contact `pesty@pesty.sh`. The formula uses `cargo install --locked`. It must not run `make install`. Homebrew's own Rust stamps macOS 13.0, so a bottle is not the 2014 build.
+3. Output is `target/release/qrbin`. `make` does not copy it onto PATH and does not install under `~/.local/bin`.
+4. The published Mac install is Homebrew. The formula is `packaging/homebrew/qrbin.rb`. Homepage `https://pesty.sh`, source `https://github.com/pesty-sh/qrbin`, tap `pesty-sh/homebrew-tap`, contact `pesty@pesty.sh`. The formula uses `cargo install --locked` into Homebrew's prefix. It must not run `make`. Homebrew's own Rust stamps macOS 13.0, so a bottle is not the 2014 build.
 
-`make build` stops before the copy. `make build-silicon` cross-compiles `aarch64-apple-darwin` and checks a macOS 11.0 stamp. It does not install. `make build-windows` cross-compiles `x86_64-pc-windows-gnu` with the MinGW linker `x86_64-w64-mingw32-gcc` (`brew install mingw-w64`) and checks that `target/x86_64-pc-windows-gnu/release/qrbin.exe` is a PE32+ exe. It does not install. Do not set Cargo's default target to Windows. `make doctor` prints which cargo is used and whether the Windows linker is present. Re-running `make` replaces the installed Mac binary. The program has no update checker and must not gain one.
+`make build-silicon` cross-compiles `aarch64-apple-darwin` and checks a macOS 11.0 stamp. It does not install. `make build-windows` cross-compiles `x86_64-pc-windows-gnu` with the MinGW linker `x86_64-w64-mingw32-gcc` (`brew install mingw-w64`) and checks that `target/x86_64-pc-windows-gnu/release/qrbin.exe` is a PE32+ exe. It does not install. Do not set Cargo's default target to Windows. `make doctor` prints which cargo is used and whether the Windows linker is present. Re-running `make` replaces the installed Mac binary. The program has no update checker and must not gain one.
 
 Linux package (`make deb` or `make linux`) runs `packaging/build-linux-host.sh` on this Mac. `LINUX_GLIBC` is `2.27`, the Ubuntu 18.04 version. The same binary runs on Ubuntu 20.04 (2.31), 22.04 (2.35), 24.04 (2.39), Debian 10 (2.28) through Debian 13 (2.41), and Arch, because those ship a newer glibc. Intel and AMD are one `x86_64-unknown-linux-gnu.2.27` build. 64-bit ARM is `aarch64-unknown-linux-gnu.2.27`. Output is `dist/qrbin-linux-amd64`, `dist/qrbin-linux-arm64`, and a `.deb` for each. The script downloads Zig 0.16.0 from ziglang.org into `~/.cache/qrbin` and uses `cargo-zigbuild`. Do not `brew install zig`. Do not install the Linux binaries over `/usr/local/bin/qrbin`. `packaging/build-linux.sh` still calls Docker and is not what `make` runs.
 
@@ -65,7 +64,7 @@ Style flags require `--theme` or a `theme` key in `--theme-file`. Command flags 
 
 `--frame` and `--border-width` are the border width in pixels. `--frame-color` and `--border-color` default to black. `--label` and `--text` are the border text. Color or text without a width is an error. On a square the text sits on the bottom edge. On a circle the border is a ring, the mark is inset by the width, and the text follows the lower arc in the background color, sized from the width. Do not add border images.
 
-Classic `--size` is a minimum and the PNG is grayscale. Themed `--size` is exact and the PNG is RGBA. A non-zero themed margin is `size / 16` pixels. `0` omits that pad. Errors must not echo the payload. No URL fetch. No remote config. The logo file is `assets/logo.png`. The SVG source is `assets/logo.svg`. Local binary is `./target/release/qrbin`. Installed binary is `/usr/local/bin/qrbin`.
+Classic `--size` is a minimum and the PNG is grayscale. Themed `--size` is exact and the PNG is RGBA. A non-zero themed margin is `size / 16` pixels. `0` omits that pad. Errors must not echo the payload. No URL fetch. No remote config. The logo file is `assets/logo.png`. The SVG source is `assets/logo.svg`. Local binary is `./target/release/qrbin`. The PATH install comes from Homebrew, not from `make`.
 
 ## Privacy limits
 

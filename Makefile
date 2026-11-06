@@ -1,11 +1,10 @@
-# Build for this Mac and install that binary.
+# Build for this Mac into target/. Do not copy the binary onto PATH.
 # Intel Macs from 2014 can run macOS 10.12. rustup's standard library is
 # stamped 10.12. The cargo first on PATH is Homebrew's rustc, and that
 # standard library is stamped 13.0, so this file calls rustup by path.
 # Do not set Cargo's default target. This Mac stays the host build.
+# The published Mac install is Homebrew: brew install pesty-sh/tap/qrbin.
 
-PREFIX ?= /usr/local
-BINDIR ?= $(PREFIX)/bin
 RUSTUP := $(HOME)/.cargo/bin/rustup
 # The proxy at ~/.cargo/bin/cargo loads rustup's libLLVM so release
 # stripping works. RUSTC is pinned to the same toolchain so a cross
@@ -15,9 +14,9 @@ RUSTUP_CARGO := $(HOME)/.cargo/bin/cargo
 export RUSTC
 export MACOSX_DEPLOYMENT_TARGET := 10.12
 
-.PHONY: build install doctor build-silicon build-windows deb linux
+.PHONY: build doctor build-silicon build-windows deb linux
 
-.DEFAULT_GOAL := install
+.DEFAULT_GOAL := build
 
 build:
 	@test -x "$(RUSTC)" || { \
@@ -30,14 +29,9 @@ build:
 	}
 	"$(RUSTUP_CARGO)" build --release
 	./packaging/check-macos-minos.sh target/release/qrbin 10.12
+	@echo "target/release/qrbin"
 
-install: build
-	mkdir -p "$(BINDIR)"
-	install -m 0755 target/release/qrbin "$(BINDIR)/qrbin"
-	@"$(BINDIR)/qrbin" --version
-	@echo "updated $(BINDIR)/qrbin"
-
-# Apple silicon. Does not install, because this Intel Mac cannot run it.
+# Apple silicon. Output stays in target/. This Intel Mac cannot run it.
 # The standard library for this target is stamped macOS 11.0.
 build-silicon:
 	@test -x "$(RUSTC)" || { echo "rustup rustc is missing."; exit 1; }
