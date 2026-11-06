@@ -51,7 +51,7 @@ def main() -> None:
         f"Package: qrbin\n"
         f"Version: {version}-1\n"
         f"Architecture: {architecture}\n"
-        f"Maintainer: Your Name <you@example.com>\n"
+        f"Maintainer: pesty-sh <pesty@pesty.sh>\n"
         f"Section: utils\n"
         f"Priority: optional\n"
         f"Depends: libc6 (>= 2.27)\n"

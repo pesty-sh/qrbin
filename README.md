@@ -34,7 +34,7 @@ The program does not update itself. Run `make` again to replace the installed bi
 
 ### See the compilers before you build
 
-* `make doctor` prints the rustup `cargo` and `rustc` that `make` calls, the Homebrew cargo it ignores, the 10.12 deployment target, and whether a Docker daemon is running.
+* `make doctor` prints the rustup `cargo` and `rustc` that `make` calls, the Homebrew cargo it ignores, the 10.12 deployment target, the Windows linker, and the Linux glibc floor.
 * `cargo --version` is Homebrew Rust when `/usr/local/bin` comes first. Its standard library is stamped macOS 13.0, and it has no Apple silicon standard library. A 2014 Mac cannot load that Intel binary. Do not call it for this build. `make` pins `RUSTC` to rustup's compiler so the Homebrew one cannot be selected by accident.
 
 [`rust-toolchain.toml`](rust-toolchain.toml) tells rustup which extra targets to install. It does not change the default build target. Homebrew's cargo ignores that file.
@@ -56,18 +56,30 @@ This Intel Mac can cross-compile it. The file is not installed here, because thi
 * The binary is `target/aarch64-apple-darwin/release/qrbin`.
 * `vtool -show-build target/aarch64-apple-darwin/release/qrbin` should show macOS 11.0.
 
+### Build the Windows exe
+
+This builds `qrbin.exe` for 64-bit Windows 10 and Windows 11. It does not install that file on the Mac. The Rust target is `x86_64-pc-windows-gnu`. The linker is MinGW, installed once with Homebrew.
+
+* `brew install mingw-w64`
+* `~/.cargo/bin/rustup target add x86_64-pc-windows-gnu`
+* `make build-windows`
+* The exe is `target/x86_64-pc-windows-gnu/release/qrbin.exe`.
+* `file target/x86_64-pc-windows-gnu/release/qrbin.exe` should say `PE32+ executable`.
+
+`make doctor` also prints whether the MinGW linker is installed. `make` and `make build` stay the Intel Mac build.
+
 ### Homebrew
 
 The formula is [`packaging/homebrew/qrbin.rb`](packaging/homebrew/qrbin.rb). It builds with `cargo install --locked` into Homebrew's prefix. It does not run `make install`.
 
 Public names, already written into [`Cargo.toml`](Cargo.toml) and the formula:
 
-* GitHub account `pestyesky`, source repo `https://github.com/pestyesky/qrbin`
-* Tap repo `https://github.com/pestyesky/homebrew-tap`
+* GitHub account `pesty-sh`, source repo `https://github.com/pesty-sh/qrbin`
+* Tap repo `https://github.com/pesty-sh/homebrew-tap`
 * Homepage `https://pesty.sh`
-* Contact `hello@pesty.sh`
+* Contact `pesty@pesty.sh`
 
-Those GitHub repos are not created yet. `brew install` cannot fetch them until the account exists and the source repo is pushed. There is a separate Homebrew cask named `pesty` (a clipboard app). This formula is named `qrbin`.
+The GitHub account `pesty-sh` exists. The `qrbin` and `homebrew-tap` repositories are not created yet, so `brew install` cannot fetch them until those repos are pushed. There is a separate Homebrew cask named `pesty` (a clipboard app). This formula is named `qrbin`.
 
 `brew install` compiles with Homebrew's Rust. That compiler stamps macOS 13.0. People who install from Homebrew are on a current Mac. The 2014 build is `make`, not `brew`.
 
@@ -75,9 +87,9 @@ On this Intel Mac, Homebrew's prefix is `/usr/local`. `brew install` and `make` 
 
 * `brew --prefix` prints `/usr/local` on this Mac, and `/opt/homebrew` on Apple silicon.
 
-Create the account and the two empty GitHub repos first (`qrbin` and `homebrew-tap`). Then, from this repository:
+Create the two empty GitHub repos first (`qrbin` and `homebrew-tap`). Then, from this repository:
 
-* `git remote add origin https://github.com/pestyesky/qrbin.git`
+* `git remote add origin https://github.com/pesty-sh/qrbin.git`
 * `git push -u origin master`
 
 In a checkout of `homebrew-tap`:
@@ -90,25 +102,52 @@ In a checkout of `homebrew-tap`:
 
 Install from the latest commit. This needs the source repo to be public:
 
-* `brew tap pestyesky/tap`
-* `brew install --HEAD pestyesky/tap/qrbin`
+* `brew tap pesty-sh/tap`
+* `brew install --HEAD pesty-sh/tap/qrbin`
 * `qrbin --version`
 
 When you want a numbered release, tag the source repo, then replace the two commented lines in the formula with the real checksum:
 
 * `git tag -a 0.1.8 -m "qrbin 0.1.8"`
 * `git push origin 0.1.8`
-* `curl -fsSL -o /tmp/qrbin.tar.gz https://github.com/pestyesky/qrbin/archive/refs/tags/0.1.8.tar.gz`
+* `curl -fsSL -o /tmp/qrbin.tar.gz https://github.com/pesty-sh/qrbin/archive/refs/tags/0.1.8.tar.gz`
 * `shasum -a 256 /tmp/qrbin.tar.gz`
 * Paste that hash into `sha256` in `Formula/qrbin.rb`, uncomment `url` and `sha256`, commit, and push the tap.
 * `brew update`
-* `brew install pestyesky/tap/qrbin`
+* `brew install pesty-sh/tap/qrbin`
 
 The formula test runs `qrbin --version` and checks that one small PNG starts with the PNG signature. It does not run `cargo test`.
 
 ### Linux package
 
-`make deb` is not part of the current Mac build. The Docker client is installed at `/usr/local/bin/docker`, and the daemon is not running: there is no `/var/run/docker.sock` and no Docker process. `make deb` stops until a daemon is started. The packaging scripts are still in [`packaging/`](packaging/).
+`make linux` builds two binaries on this Mac. It does not use Docker, and it does not replace `/usr/local/bin/qrbin`.
+
+The Makefile sets `LINUX_GLIBC` to `2.27`. That is the glibc Ubuntu 18.04 ships. A program linked to 2.27 also runs on a newer glibc, so this one floor covers the later releases:
+
+| System | glibc it ships |
+|---|---|
+| Ubuntu 18.04 | 2.27 |
+| Ubuntu 20.04 | 2.31 |
+| Ubuntu 22.04 | 2.35 |
+| Ubuntu 24.04 | 2.39 |
+| Debian 10 | 2.28 |
+| Debian 11 | 2.31 |
+| Debian 12 | 2.36 |
+| Debian 13 | 2.41 |
+| Arch Linux | newer than 2.27 |
+
+Intel and AMD are the same 64-bit PC build. 64-bit ARM is a second build.
+
+* `make linux`
+* `file dist/qrbin-linux-amd64` should say `ELF 64-bit` and `x86-64`
+* `file dist/qrbin-linux-arm64` should say `ELF 64-bit` and `aarch64`
+
+`make deb` is the same command. The files are:
+
+* `dist/qrbin-linux-amd64` and `dist/qrbin_0.1.8-1_amd64.deb` for Intel and AMD
+* `dist/qrbin-linux-arm64` and `dist/qrbin_0.1.8-1_arm64.deb` for 64-bit ARM
+
+The first run downloads Zig 0.16.0 from ziglang.org into `~/.cache/qrbin` and installs `cargo-zigbuild` with rustup. Do not install Zig from Homebrew on this Mac. Homebrew would compile Zig from source, and that build needs a newer Clang than macOS 13 has.
 
 ## Two renderers, one binary
 
@@ -398,7 +437,7 @@ Theme file. Flags on this command override keys in `./theme.toml`:
 
 ## Development
 
-Requirements: Rust stable, Cargo, and Git. `make deb` also needs a running Docker daemon.
+Requirements: Rust stable, Cargo, and Git. `make linux` downloads Zig 0.16.0 on the first run. It does not need Docker.
 
 ```bash
 cargo test
