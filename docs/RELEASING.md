@@ -113,13 +113,13 @@ Homebrew, after the tag exists:
 
 1. Download `https://github.com/pesty-sh/qrbin/archive/refs/tags/v0.1.9.tar.gz`.
 2. `shasum -a 256` that file. Download it again and check the same hash a second time.
-3. Uncomment `url` and `sha256` in the tap formula. `url` is that tag tarball, not a binary.
+3. Put that hash in the tap formula. `url` is that tag tarball, not a binary.
 4. The formula keeps `depends_on "rust" => :build` and `system "cargo", "install", *std_cargo_args`.
 5. Run `brew style` and `brew audit --new` before the tap pull request.
 
-The copy in this repo, `packaging/homebrew/qrbin.rb`, is the source of the formula. Leave `url` commented here until those two steps are done. No bottles.
+For `v0.1.9` the checked hash is `afc109f18bc91139a26d1f881b1e590112ad53ad38e17b9d4dd2ab78c1a0e81e`. The copy in this repo is `packaging/homebrew/qrbin.rb`. No bottles.
 
-apt: on the Mac that holds the signing key, pass the glibc `.deb` files from `make deb` to `publish.py` in `pesty-sh/apt`. Cloud agents cannot do that. The private key must not leave that Mac.
+apt: on the Mac that holds the signing key, pass the glibc `.deb` files from `make deb` to `publish.py` in `pesty-sh/apt`. Do not pass the musl GitHub `.deb`. Its `Depends` line is empty and its filename matches the glibc package. Cloud agents cannot sign. The private key must not leave that Mac.
 
 crates.io: do not publish unless Stuart asks.
 

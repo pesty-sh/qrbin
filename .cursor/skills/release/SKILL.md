@@ -34,7 +34,7 @@ Read `.cursor/skills/qrbin/SKILL.md` before changing the Makefile, the glibc Lin
 | `docs/RELEASING.md` | The map of those files. |
 | `docs/RELEASE_NOTES_TEMPLATE.md` | Body of the GitHub Release. The word `VERSION` is replaced with the Cargo version. |
 | `deny.toml` | `cargo deny check`. |
-| `packaging/homebrew/qrbin.rb` | Source formula. `url` stays commented until the tag exists and the checksum is real. |
+| `packaging/homebrew/qrbin.rb` | Source formula. `url` is the `v0.1.9` tag tarball. `sha256` is `afc109f18bc91139a26d1f881b1e590112ad53ad38e17b9d4dd2ab78c1a0e81e`, checked twice. No bottle. |
 
 The Intel, Apple silicon, and universal files are the `pesty-sh/rmbin` Mac workflows with the binary name `qrbin`. Do not add `pull_request` to them. GitHub lists `workflow_dispatch` workflows from the default branch, so they appear under Actions after this pull request is merged. They do not show up as pull-request checks.
 

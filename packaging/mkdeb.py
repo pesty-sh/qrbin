@@ -58,7 +58,7 @@ def main() -> None:
         f"Description: Minimal offline QR code generator\n"
         f" qrbin turns text into a QR image and writes it to stdout.\n"
         f" Linked against glibc 2.27, so this package installs on Ubuntu 18.04,\n"
-        f" 22.04, and 24.04, and on Debian with glibc 2.27 or newer.\n"
+        f" 20.04, 22.04, and 24.04, and on Debian 10 through 13.\n"
         f" The program does not contact the network.\n"
     ).encode()
     md5sums = f"{hashlib.md5(binary).hexdigest()}  usr/bin/qrbin\n".encode()
