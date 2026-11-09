@@ -2,12 +2,11 @@ class Qrbin < Formula
   desc "Offline-first QR generator with no telemetry and no network access"
   homepage "https://pesty.sh"
   license "MIT"
+  # Source tarball for tag v0.1.9. The sha256 was computed from two
+  # separate downloads of this URL. There is no bottle.
+  url "https://github.com/pesty-sh/qrbin/archive/refs/tags/v0.1.9.tar.gz"
+  sha256 "afc109f18bc91139a26d1f881b1e590112ad53ad38e17b9d4dd2ab78c1a0e81e"
   head "https://github.com/pesty-sh/qrbin.git", branch: "master"
-
-  # After a tag is on GitHub, add these two lines and install without --HEAD.
-  # The sha256 is of GitHub's tarball, not of a local git archive.
-  # url "https://github.com/pesty-sh/qrbin/archive/refs/tags/v0.1.9.tar.gz"
-  # sha256 "PASTE_SHA256_HERE"
 
   depends_on "rust" => :build
 

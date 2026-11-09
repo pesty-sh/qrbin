@@ -106,7 +106,11 @@ When you want a numbered release, follow [docs/RELEASING.md](docs/RELEASING.md).
 * `git tag -a v0.1.9 -m "qrbin 0.1.9"`
 * `git push origin v0.1.9`
 
-That tag builds the GitHub Release. Homebrew still compiles from the source tarball. Download `https://github.com/pesty-sh/qrbin/archive/refs/tags/v0.1.9.tar.gz`, run `shasum -a 256` on it, download it again, and check the same hash. Paste that hash into `sha256` in the tap formula, uncomment `url` and `sha256`, then run `brew style` and `brew audit --new` before the tap pull request. There is no bottle.
+That tag builds the GitHub Release. Homebrew still compiles from the source tarball. There is no bottle.
+
+* `brew install pesty-sh/tap/qrbin`
+
+The formula downloads `https://github.com/pesty-sh/qrbin/archive/refs/tags/v0.1.9.tar.gz`. Its `sha256`, checked twice from that download, is `afc109f18bc91139a26d1f881b1e590112ad53ad38e17b9d4dd2ab78c1a0e81e`. A later tag needs the same two downloads before the hash in the tap is changed.
 
 The formula test runs `qrbin --version` and checks that one small PNG starts with the PNG signature. It does not run `cargo test`.
 
@@ -140,6 +144,8 @@ Intel and AMD are the same 64-bit PC build. 64-bit ARM is a second build.
 * `dist/qrbin-linux-arm64` and `dist/qrbin_0.1.9-1_arm64.deb` for 64-bit ARM
 
 These `.deb` files depend on glibc 2.27. The GitHub Release ships a different static musl `.deb` with the same filename. Apt publishes this glibc build, not the musl one.
+
+The signed repository is [pesty-sh/apt](https://github.com/pesty-sh/apt), served at `https://pesty-sh.github.io/apt`. On the Mac that holds the signing key, `python3 publish.py` takes these two files. It refuses a package whose `Depends` line is empty, which is how the musl GitHub package is marked.
 
 The first run downloads Zig 0.16.0 from ziglang.org into `~/.cache/qrbin` and installs `cargo-zigbuild` with rustup. Do not install Zig from Homebrew on this Mac. Homebrew would compile Zig from source, and that build needs a newer Clang than macOS 13 has.
 
