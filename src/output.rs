@@ -138,7 +138,13 @@ fn themed_margin(args: &Args, style: &ResolvedTheme) -> u32 {
         (args.size / 16).max(1)
     };
     let ring_gap = match (&style.frame, style.shape) {
-        (Some(frame), Shape::Circle) => (frame.thickness.ceil() as u32).saturating_add(16),
+        (Some(frame), Shape::Circle) => {
+            // Pixel width. A normal frame fits in u32. `as` is the stable
+            // conversion from f64, and the value was already accepted as f64.
+            #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+            let pixels = frame.thickness.ceil() as u32;
+            pixels.saturating_add(16)
+        }
         _ => 0,
     };
     quiet.max(ring_gap)

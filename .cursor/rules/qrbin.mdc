@@ -11,7 +11,7 @@ One Rust package named `qrbin` at the repo root. There is no `qrbin-cli` crate.
 - `make deb` and `make linux` start `packaging/build-linux-host.sh`. The glibc floor is 2.27, Ubuntu 18.04. That binary also runs on Ubuntu 20.04, 22.04, and 24.04, Debian 10 through 13, and Arch. Intel and AMD are `dist/qrbin-linux-amd64`. 64-bit ARM is `dist/qrbin-linux-arm64`. Each gets a `.deb`. Docker is not used. Do not install those binaries over the Mac one.
 - Host `cargo` on this Mac is Homebrew. Do not set Cargo's default target away from this machine.
 - CLI is `qrbin [OPTIONS] [PAYLOAD]`. Formats are `png` and `svg`. ECC values are `low`, `medium`, `quartile`, and `high`.
-- Release 0.1.8. Omit `--theme` for the classic renderer. `--theme` is `plain`, `rounded`, `dots`, or `classy`. Added flags: `--fg`, `--bg`, `--gradient`, `--from`, `--to`, `--shape`, `--logo`, `--frame`/`--border-width`, `--frame-color`/`--border-color`, `--label`/`--text`, `--theme-file`. Themed output is `qr-code-styling` 0.2.4 with the `png` feature. No `--type`. No 0.1.9.
+- Release 0.1.9. Omit `--theme` for the classic renderer. `--theme` is `plain`, `rounded`, `dots`, or `classy`. Added flags: `--fg`, `--bg`, `--gradient`, `--from`, `--to`, `--shape`, `--logo`, `--frame`/`--border-width`, `--frame-color`/`--border-color`, `--label`/`--text`, `--theme-file`. Themed output is `qr-code-styling` 0.2.4 with the `png` feature. No `--type`. JPEG, WebP, PDF, and CMYK stay out.
 - No telemetry, HTTP client, update checker, or payload logging.
 
-Before build, install, or packaging work, read `.cursor/skills/qrbin/SKILL.md`.
+Before build, install, or packaging work, read `.cursor/skills/qrbin/SKILL.md`. Before a release, read `.cursor/skills/release/SKILL.md`.
