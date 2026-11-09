@@ -145,7 +145,7 @@ Intel and AMD are the same 64-bit PC build. 64-bit ARM is a second build.
 
 These `.deb` files depend on glibc 2.27. The GitHub Release ships a different static musl `.deb` with the same filename. Apt publishes this glibc build, not the musl one.
 
-The signed repository is [pesty-sh/apt](https://github.com/pesty-sh/apt), served at `https://pesty-sh.github.io/apt`. On the Mac that holds the signing key, `python3 publish.py` takes these two files. It refuses a package whose `Depends` line is empty, which is how the musl GitHub package is marked.
+The signed repository is [pesty-sh/apt](https://github.com/pesty-sh/apt), served at `https://pesty-sh.github.io/apt`. On the Mac that holds the signing key, `python3 publish.py` takes these two glibc files. Do not pass it the GitHub Release `.deb`. That file is static musl, `Depends` is empty, and the filename matches.
 
 The first run downloads Zig 0.16.0 from ziglang.org into `~/.cache/qrbin` and installs `cargo-zigbuild` with rustup. Do not install Zig from Homebrew on this Mac. Homebrew would compile Zig from source, and that build needs a newer Clang than macOS 13 has.
 

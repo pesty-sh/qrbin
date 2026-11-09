@@ -119,7 +119,7 @@ Homebrew, after the tag exists:
 
 For `v0.1.9` the checked hash is `afc109f18bc91139a26d1f881b1e590112ad53ad38e17b9d4dd2ab78c1a0e81e`. The copy in this repo is `packaging/homebrew/qrbin.rb`. No bottles.
 
-apt: on the Mac that holds the signing key, pass the glibc `.deb` files from `make deb` to `publish.py` in `pesty-sh/apt`. `publish.py` refuses a package with an empty `Depends` line, so the musl GitHub `.deb` cannot replace the pool file. Cloud agents cannot sign. The private key must not leave that Mac.
+apt: on the Mac that holds the signing key, pass the glibc `.deb` files from `make deb` to `publish.py` in `pesty-sh/apt`. Do not pass the musl GitHub `.deb`. Its `Depends` line is empty and its filename matches the glibc package. Cloud agents cannot sign. The private key must not leave that Mac.
 
 crates.io: do not publish unless Stuart asks.
 
