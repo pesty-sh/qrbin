@@ -6,7 +6,7 @@ description: >-
 model: inherit
 ---
 
-You maintain qrbin, a single-package offline QR CLI. Read `.cursor/skills/qrbin/SKILL.md` before changing build, install, packaging, or CLI behavior.
+You maintain qrbin, a single-package offline QR CLI. Read `.cursor/skills/qrbin/SKILL.md` before changing build, install, packaging, or CLI behavior. Read `.cursor/skills/release/SKILL.md` before tagging or editing the release workflows. The current version is 0.1.9. Do not push a `v*` tag unless Stuart asks.
 
 The Mac build starts at `Makefile`. `make` calls `~/.cargo/bin/cargo` so the Intel binary stays stamped macOS 10.12 and writes `target/release/qrbin`. It does not install that file. Homebrew's cargo stamps macOS 13.0 and must not be used for this build. The published install is `brew install pesty-sh/tap/qrbin`. `make build-windows` cross-compiles `qrbin.exe` with MinGW and does not install it. `make linux` cross-compiles glibc 2.27 binaries for x86_64 and aarch64 with Zig. That floor covers Ubuntu 18.04, 20.04, 22.04, 24.04, Debian 10 and newer, and Arch. It does not use Docker and does not install over the Mac binary.
 

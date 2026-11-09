@@ -8,7 +8,7 @@
 Read payload → choose a renderer → write PNG or SVG to stdout → exit
 ```
 
-The package version is 0.1.8. Omit `--theme` and the classic renderer runs. Set a theme and the flags below style the mark. See [CHANGELOG.md](CHANGELOG.md).
+The package version is 0.1.9. Omit `--theme` and the classic renderer runs. Set a theme and the flags below style the mark. See [CHANGELOG.md](CHANGELOG.md). GitHub release builds are described in [docs/RELEASING.md](docs/RELEASING.md).
 
 ## Limits
 
@@ -22,7 +22,7 @@ A themed payload must be valid UTF-8. The classic renderer accepts any bytes.
 
 Run these from the repository root. [`Makefile`](Makefile) starts the Mac build. [`Cargo.toml`](Cargo.toml) is the only package. There is no `qrbin-cli` crate. The license is [MIT](LICENSE).
 
-The program does not update itself. Run `make` again to replace the installed binary.
+The program does not update itself. `make` writes `target/release/qrbin` and does not copy it onto `PATH`.
 
 ### Which Macs can run it
 
@@ -67,6 +67,8 @@ This builds `qrbin.exe` for 64-bit Windows 10 and Windows 11. It does not instal
 * The exe is `target/x86_64-pc-windows-gnu/release/qrbin.exe`.
 * `file target/x86_64-pc-windows-gnu/release/qrbin.exe` should say `PE32+ executable`.
 
+The GitHub Release zip is a separate unsigned build. Windows SmartScreen warns the first time somebody runs that `qrbin.exe`. The warning is the missing signature.
+
 `make doctor` also prints whether the MinGW linker is installed. `make` and `make build` stay the Intel Mac build.
 
 ### Homebrew
@@ -99,15 +101,12 @@ Trust is stored on your Mac. Run it once for this tap. It covers `qrbin` and any
 
 `--HEAD` installs the latest commit on `master`. The first install compiles with Homebrew's Rust and needs a network connection. After that, `qrbin` with no path is the Homebrew build. A fresh build from this repository stays at `./target/release/qrbin` and is not copied onto `PATH`.
 
-When you want a numbered release, tag the source repo, then replace the two commented lines in the formula with the real checksum:
+When you want a numbered release, follow [docs/RELEASING.md](docs/RELEASING.md). The short version, after the pull request is green:
 
-* `git tag -a 0.1.8 -m "qrbin 0.1.8"`
-* `git push origin 0.1.8`
-* `curl -fsSL -o /tmp/qrbin.tar.gz https://github.com/pesty-sh/qrbin/archive/refs/tags/0.1.8.tar.gz`
-* `shasum -a 256 /tmp/qrbin.tar.gz`
-* Paste that hash into `sha256` in `Formula/qrbin.rb`, uncomment `url` and `sha256`, commit, and push the tap.
-* `brew update`
-* `brew install pesty-sh/tap/qrbin`
+* `git tag -a v0.1.9 -m "qrbin 0.1.9"`
+* `git push origin v0.1.9`
+
+That tag builds the GitHub Release. Homebrew still compiles from the source tarball. Download `https://github.com/pesty-sh/qrbin/archive/refs/tags/v0.1.9.tar.gz`, run `shasum -a 256` on it, download it again, and check the same hash. Paste that hash into `sha256` in the tap formula, uncomment `url` and `sha256`, then run `brew style` and `brew audit --new` before the tap pull request. There is no bottle.
 
 The formula test runs `qrbin --version` and checks that one small PNG starts with the PNG signature. It does not run `cargo test`.
 
@@ -137,8 +136,10 @@ Intel and AMD are the same 64-bit PC build. 64-bit ARM is a second build.
 
 `make deb` is the same command. The files are:
 
-* `dist/qrbin-linux-amd64` and `dist/qrbin_0.1.8-1_amd64.deb` for Intel and AMD
-* `dist/qrbin-linux-arm64` and `dist/qrbin_0.1.8-1_arm64.deb` for 64-bit ARM
+* `dist/qrbin-linux-amd64` and `dist/qrbin_0.1.9-1_amd64.deb` for Intel and AMD
+* `dist/qrbin-linux-arm64` and `dist/qrbin_0.1.9-1_arm64.deb` for 64-bit ARM
+
+These `.deb` files depend on glibc 2.27. The GitHub Release ships a different static musl `.deb` with the same filename. Apt publishes this glibc build, not the musl one.
 
 The first run downloads Zig 0.16.0 from ziglang.org into `~/.cache/qrbin` and installs `cargo-zigbuild` with rustup. Do not install Zig from Homebrew on this Mac. Homebrew would compile Zig from source, and that build needs a newer Clang than macOS 13 has.
 
@@ -148,7 +149,7 @@ Omit `--theme` and `--theme-file` and qrbin uses the `qrcode` 0.14 renderer. Tha
 
 Set `--theme`, or pass a `--theme-file` that names one, and qrbin uses `qr-code-styling` 0.2.4 with its `png` feature only. SVG rendering comes with that crate. PNG is rasterized from the SVG after any frame is applied, so a frame appears in both formats. Themed PNG is 8-bit RGBA at the exact `--size` in both dimensions.
 
-Both paths are linked into the one executable. A classic run still uses the `qrcode` writer. The file is about 3.5 MB because the themed path includes `resvg`. JPEG, WebP, PDF, and CMYK stay disabled. There is no 0.1.9 in this line. There is no `--type` flag.
+Both paths are linked into the one executable. A classic run still uses the `qrcode` writer. The file is about 3.5 MB because the themed path includes `resvg`. JPEG, WebP, PDF, and CMYK stay disabled in 0.1.9. There is no `--type` flag.
 
 The styling crate's own error-correction default is quartile. qrbin always passes `--ecc` through. Its margin is in pixels, so qrbin does not forward the classic module count. See [Quiet zone](#quiet-zone).
 

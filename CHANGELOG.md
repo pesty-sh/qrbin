@@ -1,13 +1,17 @@
 # Changelog
 
-## Unreleased
+## 0.1.9 — 2026-11-09
+
+Release builds. The picture qrbin draws is the same as 0.1.8.
 
 - The Intel build calls rustup and keeps a macOS 10.12 stamp, so a 2014 Mac can run it. Homebrew's rustc stamps 13.0 and is not used.
 - `make build-silicon` cross-compiles the Apple silicon binary and checks a macOS 11.0 stamp.
-- `make build-windows` cross-compiles a 64-bit `qrbin.exe` for Windows 10 and 11. It does not install that file on the Mac.
-- `make linux` cross-compiles glibc 2.27 builds for Intel/AMD and 64-bit ARM. That floor runs on Ubuntu 18.04, 20.04, 22.04, 24.04, Debian 10 through 13, and Arch. Docker is not used.
-- Package metadata and `packaging/homebrew/qrbin.rb` point at GitHub `pesty-sh/qrbin`, homepage `https://pesty.sh`, and `pesty@pesty.sh`.
+- `make build-windows` cross-compiles a 64-bit `qrbin.exe` for Windows 10 and 11. It does not install that file on the Mac. The GitHub Release zip is unsigned, so Windows SmartScreen warns on the first run.
+- `make linux` cross-compiles glibc 2.27 builds for Intel/AMD and 64-bit ARM. That floor runs on Ubuntu 18.04, 20.04, 22.04, 24.04, Debian 10 through 13, and Arch. Docker is not used. Those `.deb` files are the ones apt publishes.
+- A `v*` tag builds static musl Linux archives and gzip `.deb` files for x86_64, aarch64, armv7, and i686, plus a Windows zip and `SHA256SUMS`. macOS builds are separate workflows. See [docs/RELEASING.md](docs/RELEASING.md).
+- Package metadata and `packaging/homebrew/qrbin.rb` point at GitHub `pesty-sh/qrbin`, homepage `https://pesty.sh`, and `pesty@pesty.sh`. Homebrew still builds from source.
 - `make` no longer installs. Fresh builds stay in `target/`. The Mac program on `PATH` is installed with Homebrew.
+- JPEG, WebP, PDF, and CMYK stay out. There is no `--type` flag.
 
 ## 0.1.0 — 2026-10-28
 
@@ -28,7 +32,7 @@ Themed rendering in the same binary. A command with no `--theme` and no `--theme
 - `--shape circle`. `--logo` reads a local file and rejects a path that contains `://`.
 - Border width `--frame` / `--border-width`, color `--frame-color` / `--border-color`, text `--label` / `--text`. A circle border is a ring.
 - `--theme-file` reads local TOML. Command flags override the file.
-- JPEG, WebP, PDF, and CMYK stay out, so there is no 0.1.9.
+- JPEG, WebP, PDF, and CMYK stay out.
 
 | Version | Scope |
 |---|---|
@@ -40,3 +44,4 @@ Themed rendering in the same binary. A command with no `--theme` and no `--theme
 | 0.1.6 | Logo from a local file. No URL fetch. |
 | 0.1.7 | Frame thickness, color, and an optional text label. No border images. |
 | 0.1.8 | Local TOML theme file. Flags override the file. No remote config. |
+| 0.1.9 | GitHub release builds for musl Linux, Windows, and optional Mac binaries. No JPEG, WebP, PDF, CMYK, or `--type`. |

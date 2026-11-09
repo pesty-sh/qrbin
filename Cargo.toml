@@ -1,6 +1,6 @@
 [package]
 name = "qrbin"
-version = "0.1.8"
+version = "0.1.9"
 edition = "2021"
 rust-version = "1.85"
 description = "Minimal, offline-first QR code generator with no telemetry and no network access."
@@ -49,6 +49,31 @@ lto = true
 codegen-units = 1
 strip = true
 panic = "abort"
+
+# cargo-deb reads this when GitHub Actions packs the static musl binaries.
+# `make deb` on the Mac does not. That path uses packaging/mkdeb.py and
+# still depends on glibc 2.27. The two .deb files can share a filename.
+# Apt publishes the glibc one. The GitHub Release publishes the musl one.
+[package.metadata.deb]
+maintainer = "pesty-sh <pesty@pesty.sh>"
+copyright = "2026 pesty-sh"
+section = "utils"
+priority = "optional"
+# Static musl binaries do not link glibc. An empty depends list stops
+# cargo-deb from adding libc6 via `$auto`.
+depends = ""
+extended-description = """
+Turns text into a QR image and writes it to stdout.
+No network access and no telemetry.
+This package is a static musl build. It does not depend on glibc.
+Installing or removing it only adds or removes /usr/bin/qrbin.
+"""
+assets = [
+    # `target/release/` is a token cargo-deb rewrites for the real target dir.
+    ["target/release/qrbin", "usr/bin/", "755"],
+    ["README.md", "usr/share/doc/qrbin/README.md", "644"],
+    ["LICENSE", "usr/share/doc/qrbin/LICENSE", "644"],
+]
 
 [lints.rust]
 unsafe_code = "forbid"

@@ -50,7 +50,7 @@ Linux package (`make deb` or `make linux`) runs `packaging/build-linux-host.sh` 
 
 `qrcode` 0.14 `quiet_zone` takes a bool. Non-zero margin passes `true` and the library uses its fixed 4-module border. `0` passes `false`. `qrcode` features `image` and `svg` must stay enabled. SVG rendering uses `qrcode::render::svg::Color`, not raw strings.
 
-Release 0.1.8. Do not route a command without `--theme` or `--theme-file` through `qr-code-styling`. `--theme` selects `qr-code-styling` 0.2.4 with the `png` feature only. Do not add `--type`. There is no 0.1.9. Linking the themed renderer increases binary size even for classic runs.
+Release 0.1.9. Do not route a command without `--theme` or `--theme-file` through `qr-code-styling`. `--theme` selects `qr-code-styling` 0.2.4 with the `png` feature only. Do not add `--type`. JPEG, WebP, PDF, and CMYK stay out. Linking the themed renderer increases binary size even for classic runs. Before a release, read `.cursor/skills/release/SKILL.md`.
 
 ## Theme arguments
 
