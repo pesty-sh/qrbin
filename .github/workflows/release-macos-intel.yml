@@ -12,8 +12,9 @@
 # this appends. It does not fail just because the release exists.
 #
 # cancel-in-progress is false, and the group name is not the main CI
-# group. A newer pull-request run cannot cancel this job while it is queued.
-# A cancellation that names runner capacity is not a code bug. Rerun the job.
+# group. A newer pull-request run cannot cancel this job with
+# "higher priority waiting request". That message is what cancelled the
+# Intel job while it was still queued in the main CI.
 #
 # Public repositories are not billed for these minutes.
 
@@ -46,7 +47,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # CHANGE ME: keep this pin in step with rust-toolchain.toml.
+      # CHANGE ME: keep this pin in step with rust-toolchain.toml (stable).
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: x86_64-apple-darwin
@@ -55,7 +56,7 @@ jobs:
       # This runner is Intel, so these tests really execute.
       - name: Test
         env:
-          # CHANGE ME: 10.12 is the Intel floor. A 2014 Mac can load it.
+          # CHANGE ME: 10.12 is the Intel floor. The owner's Mac is macOS 13.
           MACOSX_DEPLOYMENT_TARGET: "10.12"
         run: cargo test --locked --target x86_64-apple-darwin
 

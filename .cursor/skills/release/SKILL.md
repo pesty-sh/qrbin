@@ -28,13 +28,15 @@ Read `.cursor/skills/qrbin/SKILL.md` before changing the Makefile, the glibc Lin
 |---|---|
 | `.github/workflows/ci.yml` | Pull requests and pushes to `master`. fmt, clippy, tests, four musl targets, Windows msvc, cargo-deny. `cancel-in-progress: true`. |
 | `.github/workflows/release.yml` | Tag `v*` only. Musl tarballs, gzip `.deb`, Windows zip, `SHA256SUMS`, GitHub Release. |
-| `.github/workflows/release-macos-intel.yml` | `workflow_dispatch` and tag `v*`. `MACOSX_DEPLOYMENT_TARGET=10.12`. Own concurrency group, `cancel-in-progress: false`. `gh release upload --clobber`. |
-| `.github/workflows/release-apple-silicon.yml` | Same, with `MACOSX_DEPLOYMENT_TARGET=11.0`. |
-| `.github/workflows/release-macos-universal.yml` | `workflow_dispatch` with a `tag` input. No checkout. `GH_REPO: ${{ github.repository }}`. `lipo -create`. Name a missing release or tarball in the failure. |
+| `.github/workflows/release-macos-intel.yml` | `workflow_dispatch` and tag `v*`. `runs-on: macos-15-intel`. `MACOSX_DEPLOYMENT_TARGET=10.12`. Concurrency group `macos-intel-${{ github.ref }}`, `cancel-in-progress: false`. `gh release upload --clobber`. |
+| `.github/workflows/release-apple-silicon.yml` | `workflow_dispatch` and tag `v*`. `runs-on: macos-latest`. `MACOSX_DEPLOYMENT_TARGET=11.0`. Concurrency group `apple-silicon-${{ github.ref }}`, `cancel-in-progress: false`. `gh release upload --clobber`. |
+| `.github/workflows/release-macos-universal.yml` | `workflow_dispatch` with a `tag` input, default `v0.1.9`. `runs-on: macos-15-intel`. No checkout. `GH_REPO: ${{ github.repository }}`. Check the release exists, name a missing tarball, then `lipo -create`. |
 | `docs/RELEASING.md` | The map of those files. |
 | `docs/RELEASE_NOTES_TEMPLATE.md` | Body of the GitHub Release. The word `VERSION` is replaced with the Cargo version. |
 | `deny.toml` | `cargo deny check`. |
 | `packaging/homebrew/qrbin.rb` | Source formula. `url` stays commented until the tag exists and the checksum is real. |
+
+The Intel, Apple silicon, and universal files are the `pesty-sh/rmbin` Mac workflows with the binary name `qrbin`. Do not add `pull_request` to them. GitHub lists `workflow_dispatch` workflows from the default branch, so they appear under Actions after this pull request is merged. They do not show up as pull-request checks.
 
 Lines that change when this file is copied to another pesty-sh tool are marked `# CHANGE ME:`.
 

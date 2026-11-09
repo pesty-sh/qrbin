@@ -15,7 +15,6 @@
 # The main CI concurrency group is separate. cancel-in-progress is false
 # so a later CI run cannot cancel this queue. GitHub's arm64 Mac runners
 # are often slow to start. Leave this job alone while it waits.
-# A failure that says the runner was cancelled for capacity is not a code bug.
 #
 # Public repositories are not billed for these minutes.
 
@@ -35,7 +34,7 @@ on:
 permissions:
   contents: write
 
-# Own group. The main workflow uses `${{ github.workflow }}-${{ github.ref }}`.
+# Own group. ci.yml uses `${{ github.workflow }}-${{ github.ref }}`.
 # A different group means the two workflows never cancel each other.
 # cancel-in-progress: false means a second click does not kill the one
 # already waiting for a runner.
@@ -46,7 +45,8 @@ concurrency:
 jobs:
   apple-silicon:
     name: macOS Apple Silicon optional
-    # CHANGE ME: macos-latest is the current arm64 image.
+    # CHANGE ME: macos-latest is the current arm64 image. macos-15 is the
+    # same pool that filled up for the sibling tools. Either one is an arm64 runner.
     runs-on: macos-latest
     # CHANGE ME: 360 is the longest GitHub allows a job to run.
     # The queue before a runner is free can be long. This limit is the
@@ -56,7 +56,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # rust-toolchain.toml says stable.
+      # rust-toolchain.toml says stable. Cargo.toml rust-version is 1.85.
       # CHANGE ME: if you raise the MSRV, change this pin too.
       - uses: dtolnay/rust-toolchain@stable
         with:
@@ -64,6 +64,7 @@ jobs:
           components: rustfmt, clippy
 
       # This runner is Apple silicon, so the tests actually execute.
+      # Pull-request CI does not build this target.
       - name: Test
         env:
           # CHANGE ME: 11.0 is the oldest macOS an arm64 binary can load.
@@ -78,7 +79,9 @@ jobs:
           cargo build --release --locked --target aarch64-apple-darwin
           ./packaging/check-macos-minos.sh target/aarch64-apple-darwin/release/qrbin 11.0
 
-      # The archive name matches the one the universal job downloads.
+      # The archive name matches the one the Intel job cross-compiles.
+      # On a tag, `gh release upload --clobber` replaces that cross-build
+      # with this native, tested binary.
       - name: Pack tarball and checksum
         run: |
           set -eu
